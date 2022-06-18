@@ -32,27 +32,14 @@ class Validate implements ParameterAnnotationInterface
     /**
      * @param array<string, mixed> $values
      */
-    public function __construct($rule = [])
+    public function __construct(string $for, string $rule)
     {
-        $values = $rule;
-        if (is_string($values)) {
-            $this->rule = $values;
-        } else {
-            $this->rule = $values['rule'] ?? null;
-            if (isset($values['for'])) {
-                $this->for = ltrim($values['for'], '$');
-            }
-        }
-        if (! isset($values['rule'])) {
-            throw new BadMethodCallException('The @Validate annotation must be passed a rule. For instance: "#Validate("email")" in PHP 8+ or "@Validate(for="$email", rule="email")" in PHP 7+');
-        }
+        $this->for = $for;
+        $this->rule = $rule;
     }
 
     public function getTarget(): string
     {
-        if ($this->for === null) {
-            throw new BadMethodCallException('The @Validate annotation must be passed a target. For instance: "@Validate(for="$email", rule="email")"');
-        }
         return $this->for;
     }
 
