@@ -1,5 +1,5 @@
 {
-    "name": "thecodingmachine/graphqlite-laravel",
+    "name": "tylerfiekens/graphqlite-laravel",
     "description": "A Laravel service provider package to help you get started with GraphQLite in Laravel.",
     "keywords": [
         "GraphQL",
