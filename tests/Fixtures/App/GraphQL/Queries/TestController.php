@@ -1,7 +1,7 @@
 <?php
 
 
-namespace App\Http\Controllers;
+namespace App\GraphQL\Queries;
 
 
 use Illuminate\Pagination\LengthAwarePaginator;

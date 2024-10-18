@@ -2,9 +2,9 @@
 
 namespace TheCodingMachine\GraphQLite\Laravel\Providers;
 
-use GraphQL\Type\Definition\ObjectType;
-use GraphQL\Type\SchemaConfig;
-use Illuminate\Contracts\Auth\Access\Gate;
+use GraphQL\GraphQL;
+use GraphQL\Validator\DocumentValidator;
+use GraphQL\Validator\Rules\DisableIntrospection;
 use Illuminate\Contracts\Auth\Factory as AuthFactory;
 use Illuminate\Contracts\Events\Dispatcher;
 use Laminas\Diactoros\ResponseFactory;
@@ -26,7 +26,6 @@ use TheCodingMachine\GraphQLite\Http\HttpCodeDeciderInterface;
 use TheCodingMachine\GraphQLite\Laravel\Console\Commands\GraphqliteExportSchema;
 use TheCodingMachine\GraphQLite\Laravel\Listeners\CachePurger;
 use TheCodingMachine\GraphQLite\Laravel\Mappers\Parameters\ValidateFieldMiddleware;
-use TheCodingMachine\GraphQLite\Laravel\Mappers\PaginatorTypeMapper;
 use TheCodingMachine\GraphQLite\Laravel\Mappers\PaginatorTypeMapperFactory;
 use TheCodingMachine\GraphQLite\Laravel\Security\AuthenticationService;
 use TheCodingMachine\GraphQLite\Laravel\Security\AuthorizationService;
@@ -52,12 +51,7 @@ use GraphQL\Type\Schema as WebonyxSchema;
 
 class GraphQLiteServiceProvider extends ServiceProvider
 {
-    /**
-     * Bootstrap the application services.
-     *
-     * @return void
-     */
-    public function boot(Dispatcher $events)
+    public function boot(Dispatcher $events): void
     {
         $this->publishes([
             __DIR__.'/../../config/graphqlite.php' => config_path('graphqlite.php'),
@@ -67,12 +61,7 @@ class GraphQLiteServiceProvider extends ServiceProvider
         $events->listen('cache:clearing', CachePurger::class);
     }
 
-    /**
-     * Register the application services.
-     *
-     * @return void
-     */
-    public function register()
+    public function register(): void
     {
         $this->commands([
             GraphqliteExportSchema::class,
@@ -120,6 +109,7 @@ class GraphQLiteServiceProvider extends ServiceProvider
             $serverConfig->setErrorFormatter([WebonyxErrorHandler::class, 'errorFormatter']);
             $serverConfig->setErrorsHandler([WebonyxErrorHandler::class, 'errorHandler']);
             $serverConfig->setContext(new Context());
+
             return $serverConfig;
         });
 
@@ -150,19 +140,27 @@ class GraphQLiteServiceProvider extends ServiceProvider
             $service->setAuthenticationService($app[AuthenticationService::class]);
             $service->setAuthorizationService($app[AuthorizationService::class]);
             $service->addParameterMiddleware($app[ValidateFieldMiddleware::class]);
-
             $service->addTypeMapperFactory($app[PaginatorTypeMapperFactory::class]);
 
-            $controllers = config('graphqlite.controllers', 'App\\Http\\Controllers');
-            if (!is_iterable($controllers)) {
-                $controllers = [ $controllers ];
+            $queries = config('graphqlite.queries', 'App\\GraphQL\\Queries');
+            if (!is_iterable($queries)) {
+                $queries = [ $queries ];
             }
-            $types = config('graphqlite.types', 'App\\');
+            foreach ($queries as $namespace) {
+                $service->addControllerNamespace($namespace);
+            }
+
+            $mutations = config('graphqlite.mutations', 'App\\GraphQL\\Mutations');
+            if (!is_iterable($mutations)) {
+                $mutations = [ $mutations ];
+            }
+            foreach ($mutations as $namespace) {
+                $service->addControllerNamespace($namespace);
+            }
+
+            $types = config('graphqlite.types', 'App\\GraphQL\\Types');
             if (!is_iterable($types)) {
                 $types = [ $types ];
-            }
-            foreach ($controllers as $namespace) {
-                $service->addControllerNamespace($namespace);
             }
             foreach ($types as $namespace) {
                 $service->addTypeNamespace($namespace);
@@ -181,14 +179,11 @@ class GraphQLiteServiceProvider extends ServiceProvider
 
             return $schemaFactory->createSchema();
         });
+
+        DocumentValidator::addRule(new DisableIntrospection(config('graphqlite.disable_introspection', false)));
     }
 
-    /**
-     * Get the services provided by the provider.
-     *
-     * @return array
-     */
-    public function provides()
+    public function provides(): array
     {
         return [
             SchemaFactory::class,
