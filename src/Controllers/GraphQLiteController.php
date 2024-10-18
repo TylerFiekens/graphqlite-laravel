@@ -4,13 +4,13 @@
 namespace TheCodingMachine\GraphQLite\Laravel\Controllers;
 
 
+use GraphQL\Upload\UploadMiddleware;
 use Illuminate\Http\Request;
 use GraphQL\Error\DebugFlag;
 use GraphQL\Executor\ExecutionResult;
 use GraphQL\Executor\Promise\Promise;
 use GraphQL\Server\StandardServer;
-use GraphQL\Upload\UploadMiddleware;
-use TheCodingMachine\GraphQLite\Http\HttpCodeDecider;
+use Laminas\Diactoros\ServerRequestFactory;
 use TheCodingMachine\GraphQLite\Http\HttpCodeDeciderInterface;
 use function array_map;
 use function json_decode;
@@ -44,55 +44,54 @@ class GraphQLiteController
         $this->debug = $debug === null ? false : $debug;
     }
 
-    /**
-     * Handle an incoming request.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \Closure  $next
-     * @return mixed
-     */
     public function index(Request $request): JsonResponse
     {
+        if (empty($request->all())) {
+            return response()->json([
+                'errors' => [
+                    [
+                        'message' => 'POST body is empty'
+                    ],
+                ],
+            ], 400);
+        }
+
+        if ($request->files->count() > 0) {
+            return response()->json([
+                'errors' => [
+                    [
+                        'message' => 'File uploads are not supported. Sorry, I was not able to find a way to do that in Laravel. Help would be appreciated!'
+                    ],
+                ],
+            ], 400);
+        }
+
         $psr7Request = $this->httpMessageFactory->createRequest($request);
-
-        if (strtoupper($request->getMethod()) === "POST" && empty($psr7Request->getParsedBody())) {
-            $content = $psr7Request->getBody()->getContents();
-            $parsedBody = json_decode($content, true);
-            if (json_last_error() !== JSON_ERROR_NONE) {
-                throw new \RuntimeException('Invalid JSON received in POST body: '.json_last_error_msg());
-            }
-            $psr7Request = $psr7Request->withParsedBody($parsedBody);
-        }
-
-        if (class_exists('\GraphQL\Upload\UploadMiddleware')) {
-            // Let's parse the request and adapt it for file uploads.
-            $uploadMiddleware = new UploadMiddleware();
-            $psr7Request = $uploadMiddleware->processRequest($psr7Request);
-        }
-
         return $this->handlePsr7Request($psr7Request);
     }
 
     private function handlePsr7Request(ServerRequestInterface $request): JsonResponse
     {
         $result = $this->standardServer->executePsrRequest($request);
-
         $httpCodeDecider = $this->httpCodeDecider;
         if ($result instanceof ExecutionResult) {
-            return new JsonResponse($result->toArray($this->debug), $httpCodeDecider->decideHttpStatusCode($result));
+            return response()->json($result->toArray($this->debug), $httpCodeDecider->decideHttpStatusCode($result));
         }
+
         if (is_array($result)) {
             $finalResult =  array_map(function (ExecutionResult $executionResult) {
                 return new JsonResponse($executionResult->toArray($this->debug));
             }, $result);
-            // Let's return the highest result.
+
             $statuses = array_map([$httpCodeDecider, 'decideHttpStatusCode'], $result);
             $status = max($statuses);
             return new JsonResponse($finalResult, $status);
         }
+
         if ($result instanceof Promise) {
             throw new RuntimeException('Only SyncPromiseAdapter is supported');
         }
+
         throw new RuntimeException('Unexpected response from StandardServer::executePsrRequest'); // @codeCoverageIgnore
     }
 }
