@@ -17,9 +17,13 @@ return [
      | You can put a single namespace, or an array of namespaces.
      |
      */
-    'controllers' => 'App\\Http\\Controllers',
-    'types' => 'App\\',
-    'debug' => DebugFlag::RETHROW_UNSAFE_EXCEPTIONS,
+    'queries' => 'App\\GraphQL\\Queries',
+    'mutations' => 'App\\GraphQL\\Mutations',
+    'types' => 'App\\GraphQL\\Types',
+
+    'disable_introspection' => env('GRAPHQLITE_DISABLE_INTROSPECTION', false),
+
+    'debug' => env('GRAPHQLITE_DEBUG', DebugFlag::NONE),
     'uri' => env('GRAPHQLITE_URI', '/graphql'),
     'middleware' =>  ['web'],
 
