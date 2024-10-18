@@ -1,27 +1,21 @@
 <?php
 
-
 namespace TheCodingMachine\GraphQLite\Laravel\Controllers;
 
-
-use GraphQL\Upload\UploadMiddleware;
-use Illuminate\Http\Request;
 use GraphQL\Error\DebugFlag;
 use GraphQL\Executor\ExecutionResult;
 use GraphQL\Executor\Promise\Promise;
 use GraphQL\Server\StandardServer;
-use Laminas\Diactoros\ServerRequestFactory;
-use TheCodingMachine\GraphQLite\Http\HttpCodeDeciderInterface;
-use function array_map;
-use function json_decode;
-use function json_last_error;
+use Illuminate\Http\Request;
 use Psr\Http\Message\ServerRequestInterface;
 use RuntimeException;
 use Symfony\Bridge\PsrHttpMessage\Factory\DiactorosFactory;
 use Symfony\Bridge\PsrHttpMessage\HttpMessageFactoryInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
-use function max;
+use TheCodingMachine\GraphQLite\Http\HttpCodeDeciderInterface;
 
+use function array_map;
+use function max;
 
 class GraphQLiteController
 {
@@ -29,18 +23,21 @@ class GraphQLiteController
      * @var HttpMessageFactoryInterface
      */
     private $httpMessageFactory;
+
     /** @var StandardServer */
     private $standardServer;
+
     /** @var bool|int */
     private $debug;
+
     /** @var HttpCodeDeciderInterface */
     private $httpCodeDecider;
 
-    public function __construct(StandardServer $standardServer, HttpCodeDeciderInterface $httpCodeDecider, HttpMessageFactoryInterface $httpMessageFactory = null, ?int $debug = DebugFlag::RETHROW_UNSAFE_EXCEPTIONS)
+    public function __construct(StandardServer $standardServer, HttpCodeDeciderInterface $httpCodeDecider, ?HttpMessageFactoryInterface $httpMessageFactory = null, ?int $debug = DebugFlag::RETHROW_UNSAFE_EXCEPTIONS)
     {
         $this->standardServer = $standardServer;
         $this->httpCodeDecider = $httpCodeDecider;
-        $this->httpMessageFactory = $httpMessageFactory ?: new DiactorosFactory();
+        $this->httpMessageFactory = $httpMessageFactory ?: new DiactorosFactory;
         $this->debug = $debug === null ? false : $debug;
     }
 
@@ -50,7 +47,7 @@ class GraphQLiteController
             return response()->json([
                 'errors' => [
                     [
-                        'message' => 'POST body is empty'
+                        'message' => 'POST body is empty',
                     ],
                 ],
             ], 400);
@@ -60,13 +57,14 @@ class GraphQLiteController
             return response()->json([
                 'errors' => [
                     [
-                        'message' => 'File uploads are not supported. Sorry, I was not able to find a way to do that in Laravel. Help would be appreciated!'
+                        'message' => 'File uploads are not supported. Sorry, I was not able to find a way to do that in Laravel. Help would be appreciated!',
                     ],
                 ],
             ], 400);
         }
 
         $psr7Request = $this->httpMessageFactory->createRequest($request);
+
         return $this->handlePsr7Request($psr7Request);
     }
 
@@ -79,12 +77,13 @@ class GraphQLiteController
         }
 
         if (is_array($result)) {
-            $finalResult =  array_map(function (ExecutionResult $executionResult) {
+            $finalResult = array_map(function (ExecutionResult $executionResult) {
                 return new JsonResponse($executionResult->toArray($this->debug));
             }, $result);
 
             $statuses = array_map([$httpCodeDecider, 'decideHttpStatusCode'], $result);
             $status = max($statuses);
+
             return new JsonResponse($finalResult, $status);
         }
 

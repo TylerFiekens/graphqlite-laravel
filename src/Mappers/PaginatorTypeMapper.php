@@ -11,17 +11,16 @@ use GraphQL\Type\Definition\OutputType;
 use GraphQL\Type\Definition\Type;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Contracts\Pagination\Paginator;
-use Porpaginas\Result;
 use RuntimeException;
 use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeException;
 use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeExceptionInterface;
-use TheCodingMachine\GraphQLite\Mappers\PorpaginasMissingParameterException;
 use TheCodingMachine\GraphQLite\Mappers\RecursiveTypeMapperInterface;
 use TheCodingMachine\GraphQLite\Mappers\TypeMapperInterface;
 use TheCodingMachine\GraphQLite\Types\MutableInterface;
 use TheCodingMachine\GraphQLite\Types\MutableInterfaceType;
 use TheCodingMachine\GraphQLite\Types\MutableObjectType;
 use TheCodingMachine\GraphQLite\Types\ResolvableMutableInputInterface;
+
 use function get_class;
 use function is_a;
 use function strpos;
@@ -31,6 +30,7 @@ class PaginatorTypeMapper implements TypeMapperInterface
 {
     /** @var array<string, MutableInterface&(MutableObjectType|MutableInterfaceType)> */
     private $cache = [];
+
     /** @var RecursiveTypeMapperInterface */
     private $recursiveTypeMapper;
 
@@ -42,7 +42,7 @@ class PaginatorTypeMapper implements TypeMapperInterface
     /**
      * Returns true if this type mapper can map the $className FQCN to a GraphQL type.
      *
-     * @param string $className The exact class name to look for (this function does not look into parent classes).
+     * @param  string  $className  The exact class name to look for (this function does not look into parent classes).
      */
     public function canMapClassToType(string $className): bool
     {
@@ -52,9 +52,8 @@ class PaginatorTypeMapper implements TypeMapperInterface
     /**
      * Maps a PHP fully qualified class name to a GraphQL type.
      *
-     * @param string $className The exact class name to look for (this function does not look into parent classes).
-     * @param (OutputType&Type)|null $subType An optional sub-type if the main class is an iterator that needs to be typed.
-     *
+     * @param  string  $className  The exact class name to look for (this function does not look into parent classes).
+     * @param  (OutputType&Type)|null  $subType  An optional sub-type if the main class is an iterator that needs to be typed.
      * @return MutableObjectType|MutableInterfaceType
      *
      * @throws CannotMapTypeExceptionInterface
@@ -72,19 +71,18 @@ class PaginatorTypeMapper implements TypeMapperInterface
     }
 
     /**
-     * @param OutputType&Type $subType
-     *
+     * @param  OutputType&Type  $subType
      * @return MutableObjectType|MutableInterfaceType
      */
     private function getObjectType(bool $countable, OutputType $subType): MutableInterface
     {
         if (! isset($subType->name)) {
-            throw new RuntimeException('Cannot get name property from sub type ' . get_class($subType));
+            throw new RuntimeException('Cannot get name property from sub type '.get_class($subType));
         }
 
         $name = $subType->name;
 
-        $typeName = 'PaginatorResult_' . $name;
+        $typeName = 'PaginatorResult_'.$name;
 
         if ($subType instanceof NullableType) {
             $subType = Type::nonNull($subType);
@@ -185,7 +183,7 @@ class PaginatorTypeMapper implements TypeMapperInterface
     /**
      * Returns true if this type mapper can map the $typeName GraphQL name to a GraphQL type.
      *
-     * @param string $typeName The name of the GraphQL type
+     * @param  string  $typeName  The name of the GraphQL type
      */
     public function canMapNameToType(string $typeName): bool
     {
@@ -195,8 +193,7 @@ class PaginatorTypeMapper implements TypeMapperInterface
     /**
      * Returns a GraphQL type by name (can be either an input or output type)
      *
-     * @param string $typeName The name of the GraphQL type
-     *
+     * @param  string  $typeName  The name of the GraphQL type
      * @return Type&NamedType&((ResolvableMutableInputInterface&InputObjectType)|MutableObjectType|MutableInterfaceType)
      *
      * @throws CannotMapTypeExceptionInterface
@@ -256,7 +253,7 @@ class PaginatorTypeMapper implements TypeMapperInterface
     /**
      * Returns true if this type mapper can extend an existing type for the $className FQCN
      *
-     * @param MutableInterface&(MutableObjectType|MutableInterfaceType) $type
+     * @param  MutableInterface&(MutableObjectType|MutableInterfaceType)  $type
      */
     public function canExtendTypeForClass(string $className, MutableInterface $type): bool
     {
@@ -266,7 +263,7 @@ class PaginatorTypeMapper implements TypeMapperInterface
     /**
      * Extends the existing GraphQL type that is mapped to $className.
      *
-     * @param MutableInterface&(MutableObjectType|MutableInterfaceType) $type
+     * @param  MutableInterface&(MutableObjectType|MutableInterfaceType)  $type
      *
      * @throws CannotMapTypeExceptionInterface
      */
@@ -278,7 +275,7 @@ class PaginatorTypeMapper implements TypeMapperInterface
     /**
      * Returns true if this type mapper can extend an existing type for the $typeName GraphQL type
      *
-     * @param MutableInterface&(MutableObjectType|MutableInterfaceType) $type
+     * @param  MutableInterface&(MutableObjectType|MutableInterfaceType)  $type
      */
     public function canExtendTypeForName(string $typeName, MutableInterface $type): bool
     {
@@ -288,7 +285,7 @@ class PaginatorTypeMapper implements TypeMapperInterface
     /**
      * Extends the existing GraphQL type that is mapped to the $typeName GraphQL type.
      *
-     * @param MutableInterface&(MutableObjectType|MutableInterfaceType) $type
+     * @param  MutableInterface&(MutableObjectType|MutableInterfaceType)  $type
      *
      * @throws CannotMapTypeExceptionInterface
      */
@@ -308,7 +305,7 @@ class PaginatorTypeMapper implements TypeMapperInterface
     /**
      * Decorates the existing GraphQL input type that is mapped to the $typeName GraphQL input type.
      *
-     * @param ResolvableMutableInputInterface&InputObjectType $type
+     * @param  ResolvableMutableInputInterface&InputObjectType  $type
      *
      * @throws CannotMapTypeExceptionInterface
      */

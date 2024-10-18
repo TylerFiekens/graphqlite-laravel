@@ -9,7 +9,7 @@ use GraphQL\Error\ClientAware;
 use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeExceptionInterface;
 use TheCodingMachine\GraphQLite\Mappers\CannotMapTypeTrait;
 
-class PaginatorMissingParameterException extends Exception implements ClientAware, CannotMapTypeExceptionInterface
+class PaginatorMissingParameterException extends Exception implements CannotMapTypeExceptionInterface, ClientAware
 {
     use CannotMapTypeTrait;
 

@@ -25,7 +25,7 @@ return [
 
     'debug' => env('GRAPHQLITE_DEBUG', DebugFlag::NONE),
     'uri' => env('GRAPHQLITE_URI', '/graphql'),
-    'middleware' =>  ['web'],
+    'middleware' => ['web'],
 
     // Sets the status code in the HTTP request where operations have errors.
     'http_code_decider' => HttpCodeDecider::class,

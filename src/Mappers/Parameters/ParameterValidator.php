@@ -1,8 +1,6 @@
 <?php
 
-
 namespace TheCodingMachine\GraphQLite\Laravel\Mappers\Parameters;
-
 
 use GraphQL\Type\Definition\InputType;
 use GraphQL\Type\Definition\ResolveInfo;
@@ -11,10 +9,6 @@ use Illuminate\Validation\Factory as ValidationFactory;
 use TheCodingMachine\GraphQLite\Exceptions\GraphQLAggregateException;
 use TheCodingMachine\GraphQLite\Laravel\Exceptions\ValidateException;
 use TheCodingMachine\GraphQLite\Parameters\InputTypeParameterInterface;
-use TheCodingMachine\GraphQLite\Parameters\ParameterInterface;
-use function array_combine;
-use function array_keys;
-use function implode;
 
 class ParameterValidator implements InputTypeParameterInterface
 {
@@ -22,14 +16,17 @@ class ParameterValidator implements InputTypeParameterInterface
      * @var InputTypeParameterInterface
      */
     private $parameter;
+
     /**
      * @var string
      */
     private $rules;
+
     /**
      * @var ValidationFactory
      */
     private $validationFactory;
+
     /**
      * @var string
      */
@@ -43,9 +40,8 @@ class ParameterValidator implements InputTypeParameterInterface
         $this->parameterName = $parameterName;
     }
 
-
     /**
-     * @param array<string, mixed> $args
+     * @param  array<string, mixed>  $args
      */
     public function resolve(?object $source, array $args, mixed $context, ResolveInfo $info): mixed
     {

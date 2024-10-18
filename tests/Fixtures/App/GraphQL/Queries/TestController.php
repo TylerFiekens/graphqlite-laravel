@@ -1,8 +1,6 @@
 <?php
 
-
 namespace App\GraphQL\Queries;
-
 
 use Illuminate\Pagination\LengthAwarePaginator;
 use Psr\Http\Message\UploadedFileInterface;
@@ -38,17 +36,17 @@ class TestController
     #[Query]
     public function testPaginator(): LengthAwarePaginator
     {
-        return new LengthAwarePaginator([1,2,3,4], 42, 4, 2);
+        return new LengthAwarePaginator([1, 2, 3, 4], 42, 4, 2);
     }
 
     #[Query]
-    public function testValidator(#[Validate(for: "foo", rule: "email")] string $foo,     #[Validate(for: "bar", rule: "gt:42")] int $bar): string
+    public function testValidator(#[Validate(for: 'foo', rule: 'email')] string $foo, #[Validate(for: 'bar', rule: 'gt:42')] int $bar): string
     {
         return 'success';
     }
 
     #[Query]
-    public function testValidatorMultiple(#[Validate(for: 'foo', rule: 'starts_with:192|ipv4')]string $foo): string
+    public function testValidatorMultiple(#[Validate(for: 'foo', rule: 'starts_with:192|ipv4')] string $foo): string
     {
         return 'success';
     }

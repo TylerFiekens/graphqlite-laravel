@@ -2,11 +2,16 @@
 
 namespace TheCodingMachine\GraphQLite\Laravel\Providers;
 
-use GraphQL\GraphQL;
+use GraphQL\Error\DebugFlag;
+use GraphQL\Server\ServerConfig;
+use GraphQL\Server\StandardServer;
+use GraphQL\Type\Schema as WebonyxSchema;
 use GraphQL\Validator\DocumentValidator;
 use GraphQL\Validator\Rules\DisableIntrospection;
 use Illuminate\Contracts\Auth\Factory as AuthFactory;
 use Illuminate\Contracts\Events\Dispatcher;
+use Illuminate\Contracts\Foundation\Application;
+use Illuminate\Support\ServiceProvider;
 use Laminas\Diactoros\ResponseFactory;
 use Laminas\Diactoros\ServerRequestFactory;
 use Laminas\Diactoros\StreamFactory;
@@ -16,6 +21,7 @@ use Psr\Http\Message\ServerRequestFactoryInterface;
 use Psr\Http\Message\StreamFactoryInterface;
 use Psr\Http\Message\UploadedFileFactoryInterface;
 use Symfony\Bridge\PsrHttpMessage\Factory\PsrHttpFactory;
+use Symfony\Bridge\PsrHttpMessage\HttpMessageFactoryInterface;
 use Symfony\Component\Cache\Adapter\ApcuAdapter;
 use Symfony\Component\Cache\Adapter\PhpFilesAdapter;
 use Symfony\Component\Cache\Psr16Cache;
@@ -24,30 +30,22 @@ use TheCodingMachine\GraphQLite\Exceptions\WebonyxErrorHandler;
 use TheCodingMachine\GraphQLite\Http\HttpCodeDecider;
 use TheCodingMachine\GraphQLite\Http\HttpCodeDeciderInterface;
 use TheCodingMachine\GraphQLite\Laravel\Console\Commands\GraphqliteExportSchema;
+use TheCodingMachine\GraphQLite\Laravel\Controllers\GraphQLiteController;
 use TheCodingMachine\GraphQLite\Laravel\Listeners\CachePurger;
-use TheCodingMachine\GraphQLite\Laravel\Mappers\Parameters\ValidateFieldMiddleware;
 use TheCodingMachine\GraphQLite\Laravel\Mappers\PaginatorTypeMapperFactory;
+use TheCodingMachine\GraphQLite\Laravel\Mappers\Parameters\ValidateFieldMiddleware;
+use TheCodingMachine\GraphQLite\Laravel\SanePsr11ContainerAdapter;
 use TheCodingMachine\GraphQLite\Laravel\Security\AuthenticationService;
 use TheCodingMachine\GraphQLite\Laravel\Security\AuthorizationService;
+use TheCodingMachine\GraphQLite\Schema;
+use TheCodingMachine\GraphQLite\SchemaFactory;
 use TheCodingMachine\GraphQLite\Security\AuthenticationServiceInterface;
+
 use function config;
 use function extension_loaded;
-use GraphQL\Error\DebugFlag;
-use GraphQL\Server\ServerConfig;
-use GraphQL\Server\StandardServer;
-use Illuminate\Contracts\Foundation\Application;
-use Illuminate\Support\ServiceProvider;
 use function ini_get;
 use function is_array;
 use function is_iterable;
-use Symfony\Bridge\PsrHttpMessage\Factory\DiactorosFactory;
-use Symfony\Bridge\PsrHttpMessage\HttpMessageFactoryInterface;
-use TheCodingMachine\GraphQLite\Laravel\Controllers\GraphQLiteController;
-use TheCodingMachine\GraphQLite\Laravel\Middlewares\GraphQLMiddleware;
-use TheCodingMachine\GraphQLite\Laravel\SanePsr11ContainerAdapter;
-use TheCodingMachine\GraphQLite\Schema;
-use TheCodingMachine\GraphQLite\SchemaFactory;
-use GraphQL\Type\Schema as WebonyxSchema;
 
 class GraphQLiteServiceProvider extends ServiceProvider
 {
@@ -69,19 +67,19 @@ class GraphQLiteServiceProvider extends ServiceProvider
 
         $this->app->bind(WebonyxSchema::class, Schema::class);
 
-        if (!$this->app->has(ServerRequestFactoryInterface::class)) {
+        if (! $this->app->has(ServerRequestFactoryInterface::class)) {
             $this->app->bind(ServerRequestFactoryInterface::class, ServerRequestFactory::class);
         }
-        if (!$this->app->has(StreamFactoryInterface::class)) {
+        if (! $this->app->has(StreamFactoryInterface::class)) {
             $this->app->bind(StreamFactoryInterface::class, StreamFactory::class);
         }
-        if (!$this->app->has(UploadedFileFactoryInterface::class)) {
+        if (! $this->app->has(UploadedFileFactoryInterface::class)) {
             $this->app->bind(UploadedFileFactoryInterface::class, UploadedFileFactory::class);
         }
-        if (!$this->app->has(ResponseFactoryInterface::class)) {
+        if (! $this->app->has(ResponseFactoryInterface::class)) {
             $this->app->bind(ResponseFactoryInterface::class, ResponseFactory::class);
         }
-        if (!$this->app->has(HttpCodeDeciderInterface::class)) {
+        if (! $this->app->has(HttpCodeDeciderInterface::class)) {
             $this->app->bind(HttpCodeDeciderInterface::class, HttpCodeDecider::class);
         }
 
@@ -90,7 +88,7 @@ class GraphQLiteServiceProvider extends ServiceProvider
         $this->app->singleton(GraphQLiteController::class, function (Application $app) {
             $debug = config('graphqlite.debug', DebugFlag::RETHROW_UNSAFE_EXCEPTIONS);
             $decider = config('graphqlite.http_code_decider');
-            if (!$decider) {
+            if (! $decider) {
                 $httpCodeDecider = $app[HttpCodeDeciderInterface::class];
             } else {
                 $httpCodeDecider = $app[$decider];
@@ -104,20 +102,20 @@ class GraphQLiteServiceProvider extends ServiceProvider
         });
 
         $this->app->singleton(ServerConfig::class, static function (Application $app) {
-            $serverConfig = new ServerConfig();
+            $serverConfig = new ServerConfig;
             $serverConfig->setSchema($app[Schema::class]);
             $serverConfig->setErrorFormatter([WebonyxErrorHandler::class, 'errorFormatter']);
             $serverConfig->setErrorsHandler([WebonyxErrorHandler::class, 'errorHandler']);
-            $serverConfig->setContext(new Context());
+            $serverConfig->setContext(new Context);
 
             return $serverConfig;
         });
 
         $this->app->singleton('graphqliteCache', static function () {
             if (extension_loaded('apcu') && ini_get('apc.enabled')) {
-                return new Psr16Cache(new ApcuAdapter());
+                return new Psr16Cache(new ApcuAdapter);
             } else {
-                return new Psr16Cache(new PhpFilesAdapter());
+                return new Psr16Cache(new PhpFilesAdapter);
             }
         });
 
@@ -125,11 +123,12 @@ class GraphQLiteServiceProvider extends ServiceProvider
             return new CachePurger($app['graphqliteCache']);
         });
 
-        $this->app->singleton(AuthenticationService::class, function(Application $app) {
+        $this->app->singleton(AuthenticationService::class, function (Application $app) {
             $guard = config('graphqlite.guard', $this->app['config']['auth.defaults.guard']);
-            if (!is_array($guard)) {
+            if (! is_array($guard)) {
                 $guard = [$guard];
             }
+
             return new AuthenticationService($app[AuthFactory::class], $guard);
         });
 
@@ -143,24 +142,24 @@ class GraphQLiteServiceProvider extends ServiceProvider
             $service->addTypeMapperFactory($app[PaginatorTypeMapperFactory::class]);
 
             $queries = config('graphqlite.queries', 'App\\GraphQL\\Queries');
-            if (!is_iterable($queries)) {
-                $queries = [ $queries ];
+            if (! is_iterable($queries)) {
+                $queries = [$queries];
             }
             foreach ($queries as $namespace) {
                 $service->addControllerNamespace($namespace);
             }
 
             $mutations = config('graphqlite.mutations', 'App\\GraphQL\\Mutations');
-            if (!is_iterable($mutations)) {
-                $mutations = [ $mutations ];
+            if (! is_iterable($mutations)) {
+                $mutations = [$mutations];
             }
             foreach ($mutations as $namespace) {
                 $service->addControllerNamespace($namespace);
             }
 
             $types = config('graphqlite.types', 'App\\GraphQL\\Types');
-            if (!is_iterable($types)) {
-                $types = [ $types ];
+            if (! is_iterable($types)) {
+                $types = [$types];
             }
             foreach ($types as $namespace) {
                 $service->addTypeNamespace($namespace);

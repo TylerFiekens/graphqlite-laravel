@@ -7,6 +7,7 @@ namespace TheCodingMachine\GraphQLite\Laravel\Annotations;
 use Attribute;
 use BadMethodCallException;
 use TheCodingMachine\GraphQLite\Annotations\ParameterAnnotationInterface;
+
 use function is_string;
 use function ltrim;
 
@@ -14,8 +15,11 @@ use function ltrim;
  * Use this annotation to validate a parameter for a query or mutation.
  *
  * @Annotation
+ *
  * @Target({"METHOD"})
+ *
  * @Attributes({
+ *
  *   @Attribute("for", type = "string"),
  *   @Attribute("rule", type = "string")
  * })
@@ -25,11 +29,12 @@ class Validate implements ParameterAnnotationInterface
 {
     /** @var string */
     private $for;
+
     /** @var string */
     private $rule;
 
     /**
-     * @param array<string, mixed> $values
+     * @param  array<string, mixed>  $values
      */
     public function __construct(string $for = '', $rule = [])
     {

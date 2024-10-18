@@ -2,7 +2,6 @@
 
 namespace TheCodingMachine\GraphQLite\Laravel\Exceptions;
 
-use GraphQL\Error\ClientAware;
 use TheCodingMachine\GraphQLite\Exceptions\GraphQLExceptionInterface;
 
 class ValidateException extends \Exception implements GraphQLExceptionInterface
@@ -16,6 +15,7 @@ class ValidateException extends \Exception implements GraphQLExceptionInterface
     {
         $exception = new self($message, 400);
         $exception->argumentName = $argumentName;
+
         return $exception;
     }
 
@@ -23,7 +23,6 @@ class ValidateException extends \Exception implements GraphQLExceptionInterface
     {
         return true;
     }
-
 
     /**
      * Returns the "extensions" object attached to the GraphQL error.
@@ -33,7 +32,7 @@ class ValidateException extends \Exception implements GraphQLExceptionInterface
     public function getExtensions(): array
     {
         return [
-            'argument' => $this->argumentName
+            'argument' => $this->argumentName,
         ];
     }
 }

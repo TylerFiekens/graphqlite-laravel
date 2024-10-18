@@ -1,8 +1,6 @@
 <?php
 
-
 namespace TheCodingMachine\GraphQLite\Laravel\Listeners;
-
 
 use Psr\SimpleCache\CacheInterface;
 

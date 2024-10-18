@@ -1,6 +1,5 @@
 <?php
 
-
 namespace TheCodingMachine\GraphQLite\Laravel\Security;
 
 use Illuminate\Contracts\Auth\Access\Gate;
@@ -13,6 +12,7 @@ class AuthorizationService implements AuthorizationServiceInterface
      * @var Gate
      */
     private $gate;
+
     /**
      * @var AuthenticationServiceInterface
      */
@@ -27,7 +27,7 @@ class AuthorizationService implements AuthorizationServiceInterface
     /**
      * Returns true if the "current" user has access to the right "$right"
      *
-     * @param mixed $subject The scope this right applies on. $subject is typically an object or a FQCN. Set $subject to "null" if the right is global.
+     * @param  mixed  $subject  The scope this right applies on. $subject is typically an object or a FQCN. Set $subject to "null" if the right is global.
      */
     public function isAllowed(string $right, $subject = null): bool
     {

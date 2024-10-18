@@ -2,11 +2,8 @@
 
 namespace TheCodingMachine\GraphQLite\Laravel\Console\Commands;
 
-
 use Orchestra\Testbench\TestCase;
 use TheCodingMachine\GraphQLite\Laravel\Providers\GraphQLiteServiceProvider;
-use TheCodingMachine\TDBM\TDBMService;
-
 
 class GraphqliteExportSchemaTest extends TestCase
 {

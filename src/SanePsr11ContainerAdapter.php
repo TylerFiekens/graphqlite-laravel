@@ -1,15 +1,14 @@
 <?php
 
-
 namespace TheCodingMachine\GraphQLite\Laravel;
 
-
-use function class_exists;
 use Illuminate\Container\EntryNotFoundException;
 use Illuminate\Contracts\Container\Container;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
 use Psr\Container\NotFoundExceptionInterface;
+
+use function class_exists;
 
 /**
  * A container adapter around Laravel containers that adds a "sane" implementation of PSR-11.
@@ -30,12 +29,11 @@ class SanePsr11ContainerAdapter implements ContainerInterface
     /**
      * Finds an entry of the container by its identifier and returns it.
      *
-     * @param string $id Identifier of the entry to look for.
-     *
-     * @throws NotFoundExceptionInterface  No entry was found for **this** identifier.
-     * @throws ContainerExceptionInterface Error while retrieving the entry.
-     *
+     * @param  string  $id  Identifier of the entry to look for.
      * @return mixed Entry.
+     *
+     * @throws NotFoundExceptionInterface No entry was found for **this** identifier.
+     * @throws ContainerExceptionInterface Error while retrieving the entry.
      */
     public function get($id)
     {
@@ -49,20 +47,20 @@ class SanePsr11ContainerAdapter implements ContainerInterface
      * `has($id)` returning true does not mean that `get($id)` will not throw an exception.
      * It does however mean that `get($id)` will not throw a `NotFoundExceptionInterface`.
      *
-     * @param string $id Identifier of the entry to look for.
-     *
-     * @return bool
+     * @param  string  $id  Identifier of the entry to look for.
      */
     public function has($id): bool
     {
-        if (class_exists($id) && !$this->container->has($id)) {
+        if (class_exists($id) && ! $this->container->has($id)) {
             try {
                 $this->container->get($id);
             } catch (EntryNotFoundException $e) {
                 return false;
             }
+
             return true;
         }
+
         return $this->container->has($id);
     }
 }

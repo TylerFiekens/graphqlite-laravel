@@ -1,9 +1,7 @@
 <?php
 
-
 namespace TheCodingMachine\GraphQLite\Laravel\Security;
 
-use Illuminate\Contracts\Auth\Guard;
 use Illuminate\Contracts\Auth\Factory as AuthFactory;
 use TheCodingMachine\GraphQLite\Security\AuthenticationServiceInterface;
 
@@ -13,13 +11,14 @@ class AuthenticationService implements AuthenticationServiceInterface
      * @var AuthFactory
      */
     private $auth;
+
     /**
      * @var array|string[]
      */
     private $guards;
 
     /**
-     * @param string[] $guards
+     * @param  string[]  $guards
      */
     public function __construct(AuthFactory $auth, array $guards)
     {
@@ -37,6 +36,7 @@ class AuthenticationService implements AuthenticationServiceInterface
                 return true;
             }
         }
+
         return false;
     }
 
@@ -52,6 +52,7 @@ class AuthenticationService implements AuthenticationServiceInterface
                 return $user;
             }
         }
+
         return null;
     }
 }

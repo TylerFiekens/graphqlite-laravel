@@ -40,11 +40,11 @@ class GraphqliteExportSchema extends Command
         $output = $this->option('output');
 
         $sdl = SchemaPrinter::doPrint($this->schema, [
-            "sortArguments" => true,
-            "sortEnumValues" => true,
-            "sortFields" => true,
-            "sortInputFields" => true,
-            "sortTypes" => true,
+            'sortArguments' => true,
+            'sortEnumValues' => true,
+            'sortFields' => true,
+            'sortInputFields' => true,
+            'sortTypes' => true,
         ]);
 
         if ($output === null) {

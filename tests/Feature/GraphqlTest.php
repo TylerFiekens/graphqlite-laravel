@@ -26,7 +26,7 @@ class GraphqlTest extends TestCase
             ->assertJson([
                 'errors' => [
                     [
-                        'message' => 'POST body is empty'
+                        'message' => 'POST body is empty',
                     ],
                 ],
             ]);
@@ -36,13 +36,13 @@ class GraphqlTest extends TestCase
     {
         $this
             ->post(route('graphqlite.index'), [
-                'file' => UploadedFile::fake()->image('avatar.jpg')
+                'file' => UploadedFile::fake()->image('avatar.jpg'),
             ])
             ->assertStatus(400)
             ->assertJson([
                 'errors' => [
                     [
-                        'message' => 'File uploads are not supported. Sorry, I was not able to find a way to do that in Laravel. Help would be appreciated!'
+                        'message' => 'File uploads are not supported. Sorry, I was not able to find a way to do that in Laravel. Help would be appreciated!',
                     ],
                 ],
             ]);
@@ -52,13 +52,13 @@ class GraphqlTest extends TestCase
     {
         $this
             ->post(route('graphqlite.index'), [
-                'query' => 'query { test }'
+                'query' => 'query { test }',
             ])
             ->assertOk()
             ->assertJson([
                 'data' => [
-                    'test' => 'foo'
-                ]
+                    'test' => 'foo',
+                ],
             ]);
     }
 
@@ -69,14 +69,14 @@ class GraphqlTest extends TestCase
                 'query' => 'query {
                     test
                     testInt
-                }'
+                }',
             ])
             ->assertOk()
             ->assertJson([
                 'data' => [
                     'test' => 'foo',
-                    'testInt' => 42
-                ]
+                    'testInt' => 42,
+                ],
             ]);
     }
 }
