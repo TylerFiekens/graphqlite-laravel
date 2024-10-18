@@ -6,7 +6,6 @@ namespace TheCodingMachine\GraphQLite\Laravel\Annotations;
 
 use Attribute;
 use BadMethodCallException;
-use TheCodingMachine\GraphQLite\Annotations\MiddlewareAnnotationInterface;
 use TheCodingMachine\GraphQLite\Annotations\ParameterAnnotationInterface;
 use function is_string;
 use function ltrim;
@@ -32,8 +31,9 @@ class Validate implements ParameterAnnotationInterface
     /**
      * @param array<string, mixed> $values
      */
-    public function __construct($rule = [])
+    public function __construct(string $for = '', $rule = [])
     {
+        $this->for = $for;
         $values = $rule;
         if (is_string($values)) {
             $this->rule = $values;
@@ -43,7 +43,8 @@ class Validate implements ParameterAnnotationInterface
                 $this->for = ltrim($values['for'], '$');
             }
         }
-        if (! isset($values['rule'])) {
+
+        if (empty($this->rule)) {
             throw new BadMethodCallException('The @Validate annotation must be passed a rule. For instance: "#Validate("email")" in PHP 8+ or "@Validate(for="$email", rule="email")" in PHP 7+');
         }
     }
@@ -53,6 +54,7 @@ class Validate implements ParameterAnnotationInterface
         if ($this->for === null) {
             throw new BadMethodCallException('The @Validate annotation must be passed a target. For instance: "@Validate(for="$email", rule="email")"');
         }
+
         return $this->for;
     }
 

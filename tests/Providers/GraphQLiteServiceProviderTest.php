@@ -10,8 +10,6 @@ use Orchestra\Testbench\TestCase;
 use TheCodingMachine\GraphQLite\Http\HttpCodeDeciderInterface;
 use TheCodingMachine\GraphQLite\Laravel\Listeners\CachePurger;
 use TheCodingMachine\GraphQLite\Schema;
-use TheCodingMachine\TDBM\TDBMService;
-use function json_decode;
 use Illuminate\Http\Request;
 use Symfony\Bridge\PsrHttpMessage\Factory\PsrHttpFactory;
 use TheCodingMachine\GraphQLite\Laravel\Controllers\GraphQLiteController;
@@ -20,7 +18,7 @@ use Symfony\Component\HttpFoundation\Request as SymfonyRequest;
 
 class GraphQLiteServiceProviderTest extends TestCase
 {
-    protected function getPackageProviders($app)
+    protected function getPackageProviders($app): array
     {
         return [GraphQLiteServiceProvider::class];
     }
