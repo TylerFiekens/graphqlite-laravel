@@ -27,7 +27,7 @@
         "illuminate/support": "^11",
         "illuminate/cache": "^11",
         "symfony/psr-http-message-bridge": "^6",
-        "laminas/laminas-diactoros": "^2.2.2",
+        "laminas/laminas-diactoros": "^3.5",
         "symfony/cache": " ^6",
         "psr/container": "^2.0.2",
         "ecodev/graphql-upload": "^7.0"
