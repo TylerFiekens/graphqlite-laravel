@@ -30,13 +30,13 @@
         "laminas/laminas-diactoros": "^2.2.2",
         "symfony/cache": " ^6",
         "psr/container": "^2.0.2",
-        "ecodev/graphql-upload": "^7.0",
-        "laravel/pint": "^1.18"
+        "ecodev/graphql-upload": "^7.0"
     },
     "require-dev": {
         "orchestra/testbench": "v9.5.2",
         "phpunit/phpunit": "^10.0.19",
-        "ext-sqlite3": "*"
+        "ext-sqlite3": "*",
+        "laravel/pint": "^1.18"
     },
     "autoload": {
         "psr-4": {
