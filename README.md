@@ -89,8 +89,8 @@ use TheCodingMachine\GraphQLite\Annotations\Query;
 
 class ExampleQuery
 {
-    #[Query]
-    public function example(): ExampleType
+    #[Query('example')]
+    public function __invoke(): ExampleType
     {
         return new ExampleType('Example', ['data' => 'example']);
     }
@@ -126,8 +126,8 @@ use TheCodingMachine\GraphQLite\Annotations\Mutation;
 
 class CreateExampleMutation
 {
-    #[Mutation]
-    public function createExample(string $name, array $data): ExampleType
+    #[Mutation(name: 'createExample')]
+    public function __invoke(string $name, array $data): ExampleType
     {
         return new ExampleType($name, $data);
     }
